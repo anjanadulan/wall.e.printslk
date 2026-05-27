@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Nunito:wght@300;400;500;600;700&family=Source+Code+Pro:wght@400;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap');
-
 /* ============================================
    MOBILE-FIRST DESIGN SYSTEM
    Base: 320px → scales up to desktop
@@ -28,9 +26,16 @@ html {
     -ms-text-size-adjust: 100%;
 }
 
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
 /* Prevent horizontal overflow on all screens */
 body {
+    width: 100%;
+    min-width: 0;
     overflow-x: hidden;
+    line-height: 1.5;
     -webkit-overflow-scrolling: touch;
     padding-top: var(--safe-top);
     padding-bottom: var(--safe-bottom);
@@ -42,6 +47,15 @@ body {
 img, video, canvas, svg {
     max-width: 100%;
     height: auto;
+}
+
+button,
+a,
+select,
+input,
+textarea,
+label {
+    touch-action: manipulation;
 }
 
 /* ============================================
@@ -249,38 +263,62 @@ img, video, canvas, svg {
 @media (max-width: 768px) {
     /* Ensure nav doesn't clip or overflow */
     nav {
-        width: 95% !important;
+        width: calc(100% - 1rem) !important;
         max-width: 100% !important;
-        padding-left: 1rem !important;
-        padding-right: 1rem !important;
+        padding: 0.75rem !important;
         height: auto !important;
-        min-height: 52px;
+        min-height: 0;
         top: 0.5rem !important;
-        gap: 0.25rem;
+        border-radius: 1.25rem !important;
+        flex-wrap: wrap;
+        gap: 0.625rem;
     }
     /* Hide the "Available" status pill on very small screens */
     nav > div:last-child {
         display: none;
     }
-    /* Shrink nav link text */
-    nav a, nav div a {
-        font-size: 0.65rem !important;
-        padding: 0.4rem 0.5rem !important;
+
+    nav > a {
+        flex: 1 1 100%;
+        justify-content: center;
+        min-height: var(--min-touch);
     }
-    /* Brand text smaller */
-    nav > a span {
+
+    nav > div:nth-child(2) {
+        order: 2;
+        display: grid !important;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 0.375rem !important;
+        width: 100%;
+    }
+
+    /* Compact, thumb-sized mobile nav links */
+    nav div a {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: var(--min-touch);
+        min-width: 0;
+        padding: 0.625rem 0.25rem !important;
+        border-radius: 0.875rem !important;
         font-size: 0.75rem !important;
+        line-height: 1.2;
+        text-align: center;
+        white-space: nowrap;
+    }
+
+    nav > a span {
+        font-size: 0.875rem !important;
     }
     nav > a img {
-        width: 1.5rem !important;
-        height: 1.5rem !important;
+        width: 1.75rem !important;
+        height: 1.75rem !important;
     }
 }
 
 @media (max-width: 380px) {
-    /* Ultra-small: show only logo, hide brand text */
-    nav > a span {
-        display: none !important;
+    nav div a {
+        font-size: 0.6875rem !important;
     }
 }
 
@@ -288,7 +326,7 @@ img, video, canvas, svg {
 @media (max-width: 768px) {
     header.min-h-screen {
         min-height: 100svh; /* use small viewport height for mobile */
-        padding-top: 5rem;
+        padding-top: 8rem;
         padding-left: 1.25rem;
         padding-right: 1.25rem;
     }
@@ -306,6 +344,7 @@ img, video, canvas, svg {
 @media (max-width: 640px) {
     /* Scale down triptych panels on small screens */
     #wall-mockup-wrapper {
+        width: 100%;
         transform: scale(0.65);
         transform-origin: center center;
     }
@@ -336,14 +375,83 @@ img, video, canvas, svg {
 
 /* --- Touch targets: all interactive elements minimum 44px --- */
 @media (max-width: 768px) {
-    button, a, select, input[type="checkbox"], label {
+    button, a, select, input, textarea, label {
         min-height: var(--min-touch);
         min-width: var(--min-touch);
     }
-    select, input[type="number"], textarea {
+    select, input, textarea {
         font-size: 16px !important; /* Prevents iOS zoom on focus */
         min-height: var(--min-touch);
         padding: 0.75rem 1rem;
+    }
+
+    input[type="checkbox"] {
+        width: 1.25rem !important;
+        height: 1.25rem !important;
+        min-width: 1.25rem;
+        min-height: 1.25rem;
+        padding: 0;
+        flex: 0 0 1.25rem;
+    }
+}
+
+/* --- Order booking query: mobile form ergonomics --- */
+@media (max-width: 640px) {
+    #contact {
+        padding-top: 4rem;
+        padding-bottom: 4rem;
+    }
+
+    #contact > div:first-child {
+        padding-left: 1rem;
+        padding-right: 1rem;
+        gap: 2rem;
+    }
+
+    #contact .lg\:col-span-7 {
+        border-radius: 1.25rem !important;
+        padding: 1rem !important;
+    }
+
+    #contact label.text-\[10px\] {
+        display: block;
+        font-size: 0.75rem !important;
+        line-height: 1.4;
+        letter-spacing: 0.04em;
+        margin-bottom: 0.375rem;
+    }
+
+    #contact select,
+    #contact input[type="number"],
+    #contact textarea {
+        border-radius: 0.875rem;
+        font-size: 1rem !important;
+        line-height: 1.5;
+    }
+
+    #contact label:has(input[type="checkbox"]) {
+        align-items: center;
+        min-height: 3.5rem;
+        padding: 0.875rem 1rem;
+        gap: 0.75rem;
+    }
+
+    #contact label:has(input[type="checkbox"]) span {
+        font-size: 0.9375rem;
+        line-height: 1.35;
+    }
+
+    #contact #form-estimate-tag {
+        font-size: 1.5rem;
+        line-height: 1.25;
+        overflow-wrap: anywhere;
+    }
+
+    #contact button[onclick="sendFormOrder()"] {
+        width: 100%;
+        min-height: 3.25rem;
+        justify-content: center;
+        font-size: 0.8125rem;
     }
 }
 

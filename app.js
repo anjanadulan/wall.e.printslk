@@ -3,17 +3,17 @@
 // Preview Artwork Database (loaded from src/port and src/hori for preview only)
 const previewArtworks = [
     // Portrait (Standard - from src/port)
-    { id: 'port1', name: 'Porsche 911 RSR', src: 'src/port/911.jpg', type: 'standard' },
-    { id: 'port2', name: 'Porsche 911 Sunset', src: 'src/port/911-2.jpg', type: 'standard' },
-    { id: 'port3', name: 'Demon Slayer', src: 'src/port/dem.jpg', type: 'standard' },
-    { id: 'port4', name: 'Jujutsu Kaisen Gojo', src: 'src/port/juju.jpg', type: 'standard' },
-    { id: 'port5', name: 'One Piece Luffy', src: 'src/port/op.jpg', type: 'standard' },
+    { id: 'port1', name: 'Porsche 911 RSR', src: 'src/port/911.webp', type: 'standard' },
+    { id: 'port2', name: 'Porsche 911 Sunset', src: 'src/port/911-2.webp', type: 'standard' },
+    { id: 'port3', name: 'Demon Slayer', src: 'src/port/dem.webp', type: 'standard' },
+    { id: 'port4', name: 'Jujutsu Kaisen Gojo', src: 'src/port/juju.webp', type: 'standard' },
+    { id: 'port5', name: 'One Piece Luffy', src: 'src/port/op.webp', type: 'standard' },
     // Landscape (Triptych - from src/hori)
-    { id: 'hori1', name: 'BMW M Power', src: 'src/hori/bm.jpg', type: 'triptych' },
-    { id: 'hori2', name: 'F1 Racing Car', src: 'src/hori/f1.jpg', type: 'triptych' },
-    { id: 'hori3', name: 'Spider-Gwen Cyberpunk', src: 'src/hori/gwen.jpg', type: 'triptych' },
-    { id: 'hori4', name: 'Cyberpunk Samurai', src: 'src/hori/samu.jpg', type: 'triptych' },
-    { id: 'hori5', name: 'Venom Neon Glow', src: 'src/hori/ven.jpg', type: 'triptych' }
+    { id: 'hori1', name: 'BMW M Power', src: 'src/hori/bm.webp', type: 'triptych' },
+    { id: 'hori2', name: 'F1 Racing Car', src: 'src/hori/f1.webp', type: 'triptych' },
+    { id: 'hori3', name: 'Spider-Gwen Cyberpunk', src: 'src/hori/gwen.webp', type: 'triptych' },
+    { id: 'hori4', name: 'Cyberpunk Samurai', src: 'src/hori/samu.webp', type: 'triptych' },
+    { id: 'hori5', name: 'Venom Neon Glow', src: 'src/hori/ven.webp', type: 'triptych' }
 ];
 
 // Art Gallery Database (loaded from src/prints only, used for works section)
@@ -21,7 +21,7 @@ const artworks = [
     {
         id: 'img1',
         name: 'Anime and Car Art Collection',
-        src: 'src/prints/img1.jpg',
+        src: 'src/prints/img1.webp',
         category: 'automotive',
         price: 300,
         desc: 'This image displays five different stylized art prints laid out together on a glass table. The collection features a mix of dramatic anime characters, including the chibi Zoro print, alongside a sleek top-down view of a Porsche 911R sports car. Each poster uses high-contrast colors and a modern, artistic design style.'
@@ -29,7 +29,7 @@ const artworks = [
     {
         id: 'img2',
         name: 'Supra Midnight Glow',
-        src: 'src/prints/img2.jpg',
+        src: 'src/prints/img2.webp',
         category: 'automotive',
         price: 1000,
         desc: 'Classic JDM street icon captured under cyber-neon lights. Printed with precision density calibration for deep black levels on glare-free heavy matte stock.'
@@ -37,7 +37,7 @@ const artworks = [
     {
         id: 'img3',
         name: 'Interstellar and Demon Slayer',
-        src: 'src/prints/img3.jpg',
+        src: 'src/prints/img3.webp',
         category: 'anime',
         price: 300,
         desc: 'The poster on the left shows an astronaut in profile wearing a white space helmet, with the movie title "INTERSTELLAR" printed at the bottom. The poster on the right features a close-up portrait of the anime character Giyu Tomioka with striking blue eyes, set against a background of black-and-white manga comic panels.'
@@ -45,7 +45,7 @@ const artworks = [
     {
         id: 'img4',
         name: 'Art Prints Collection',
-        src: 'src/prints/img4.jpg',
+        src: 'src/prints/img4.webp',
         category: 'gaming',
         price: 300,
         desc: 'The top poster displays a red and white racing motorcycle with the name "MARQUEZ" printed in large white letters. The bottom-left print shows a samurai in full armor standing amidst a field of vibrant red spider lilies, while the bottom-right print features an intense, close-up portrait of a fierce anime character enveloped in dark red energy.'
@@ -53,7 +53,7 @@ const artworks = [
     {
         id: 'img5',
         name: 'Chibi Zoro',
-        src: 'src/prints/img5.jpg',
+        src: 'src/prints/img5.webp',
         category: 'anime',
         price: 300,
         desc: 'This poster features a small, intense version of the anime character Zoro from One Piece standing amidst glowing red flames. He has bright green spiky hair and carries his signature katanas in a dark, dramatic battle scene.'
@@ -70,28 +70,33 @@ let scene, camera, renderer, particles, floatingFrames = [];
 let mouseX = 0, mouseY = 0;
 let targetX = 0, targetY = 0;
 
-// Listen for mousemove to create interactive parallax
-window.addEventListener('mousemove', (event) => {
-    mouseX = (event.clientX - window.innerWidth / 2) / 70;
-    mouseY = (event.clientY - window.innerHeight / 2) / 70;
-});
+// Desktop-only parallax keeps touch scrolling light on mobile devices.
+if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+    window.addEventListener('mousemove', (event) => {
+        mouseX = (event.clientX - window.innerWidth / 2) / 70;
+        mouseY = (event.clientY - window.innerHeight / 2) / 70;
+    }, { passive: true });
+}
 
 function initThreeBg() {
     const container = document.getElementById('three-bg-canvas');
-    if (!container) return;
+    if (!container || !window.THREE) return;
 
     try {
         scene = new THREE.Scene();
         camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         camera.position.z = 30;
 
-        renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+        const isSmallScreen = window.innerWidth < 640;
+
+        renderer = new THREE.WebGLRenderer({ alpha: true, antialias: !isSmallScreen });
         renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, isSmallScreen ? 1.25 : 2));
+        if (!renderer.domElement || !container.isConnected) return;
         container.appendChild(renderer.domElement);
 
         // Particle Points (Enhanced visibility count)
-        const particleCount = 350;
+        const particleCount = isSmallScreen ? 120 : 350;
         const geometry = new THREE.BufferGeometry();
         const positions = new Float32Array(particleCount * 3);
         const colors = new Float32Array(particleCount * 3);
@@ -147,7 +152,8 @@ function initThreeBg() {
             opacity: 0.25
         });
 
-        for (let i = 0; i < 8; i++) {
+        const frameCount = isSmallScreen ? 3 : 8;
+        for (let i = 0; i < frameCount; i++) {
             const w = Math.random() * 8 + 4;
             const h = w * 1.414; // A4 Aspect Ratio
             const frameGeo = new THREE.PlaneGeometry(w, h);
@@ -201,10 +207,11 @@ function initThreeBg() {
         animate();
 
         window.addEventListener('resize', () => {
+            if (!renderer || !camera) return;
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
-        });
+        }, { passive: true });
 
     } catch (err) {
         console.warn("Three.js not supported or canvas failed. Falling back to CSS static effects.", err);
@@ -290,7 +297,7 @@ function renderArtSelectors() {
                 id="select-art-${art.id}"
                 class="relative aspect-square border-2 rounded-xl overflow-hidden transition-all duration-300 hover:scale-105 hover:border-red-500/70 ${isActive ? 'border-red-500 shadow-red-glow' : 'border-gray-800'}"
                 title="${art.name}">
-                <img src="${art.src}" class="w-full h-full object-cover brightness-75 hover:brightness-100 transition select-none pointer-events-none">
+                <img src="${art.src}" alt="${art.name}" width="88" height="88" loading="lazy" decoding="async" class="w-full h-full object-cover brightness-75 hover:brightness-100 transition select-none pointer-events-none">
                 ${isActive ? '<div class="absolute inset-0 border-2 border-red-500 pointer-events-none rounded-xl"></div>' : ''}
             </button>
         `;
@@ -313,8 +320,8 @@ function updateWallPreview() {
         price = 300;
         desc = `A4 single-page print of "${selectedArt.name}" on Standard 230GSM Gloss photo stock. Edge-to-edge borderless trim.`;
         html = `
-            <div class="relative w-[180px] h-[254px] border-[5px] border-zinc-950 bg-black rounded shadow-2xl transition-all duration-500 hover:scale-[1.03] group overflow-hidden">
-                <img src="${selectedArt.src}" class="w-full h-full object-cover brightness-90 group-hover:brightness-100 transition-all duration-500 select-none pointer-events-none">
+            <div class="relative w-[clamp(140px,48vw,180px)] aspect-[180/254] border-[5px] border-zinc-950 bg-black rounded shadow-2xl transition-all duration-500 hover:scale-[1.03] group overflow-hidden">
+                <img src="${selectedArt.src}" alt="${selectedArt.name}" width="360" height="508" loading="lazy" decoding="async" class="w-full h-full object-cover brightness-90 group-hover:brightness-100 transition-all duration-500 select-none pointer-events-none">
                 <div class="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/5 to-white/12 pointer-events-none"></div>
             </div>
         `;
@@ -322,19 +329,19 @@ function updateWallPreview() {
         price = 1000;
         desc = `Signature Triptych 3-panel split of "${selectedArt.name}". Cleanly divided across 3 standard A4 frames, generating a 3D split visual. Built with 230GSM Gloss.`;
         html = `
-            <div class="flex items-center gap-2.5 transition-all duration-500 hover:scale-[1.02]">
+            <div class="flex w-full max-w-[92vw] items-center justify-center gap-[clamp(0.35rem,2vw,0.625rem)] transition-all duration-500 hover:scale-[1.02]">
                 <!-- Panel 1 -->
-                <div class="relative w-[140px] h-[198px] border-[4px] border-zinc-950 bg-black rounded shadow-xl overflow-hidden group">
+                <div class="relative w-[clamp(84px,28vw,140px)] aspect-[140/198] border-[4px] border-zinc-950 bg-black rounded shadow-xl overflow-hidden group">
                     <div class="w-full h-full bg-cover bg-no-repeat brightness-90 group-hover:brightness-100 transition-all duration-500 select-none pointer-events-none" style="background-image: url('${selectedArt.src}'); background-size: 300% 100%; background-position: 0% 50%;"></div>
                     <div class="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/5 to-white/10 pointer-events-none"></div>
                 </div>
                 <!-- Panel 2 -->
-                <div class="relative w-[140px] h-[198px] border-[4px] border-zinc-950 bg-black rounded shadow-xl overflow-hidden group">
+                <div class="relative w-[clamp(84px,28vw,140px)] aspect-[140/198] border-[4px] border-zinc-950 bg-black rounded shadow-xl overflow-hidden group">
                     <div class="w-full h-full bg-cover bg-no-repeat brightness-90 group-hover:brightness-100 transition-all duration-500 select-none pointer-events-none" style="background-image: url('${selectedArt.src}'); background-size: 300% 100%; background-position: 50% 50%;"></div>
                     <div class="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/5 to-white/10 pointer-events-none"></div>
                 </div>
                 <!-- Panel 3 -->
-                <div class="relative w-[140px] h-[198px] border-[4px] border-zinc-950 bg-black rounded shadow-xl overflow-hidden group">
+                <div class="relative w-[clamp(84px,28vw,140px)] aspect-[140/198] border-[4px] border-zinc-950 bg-black rounded shadow-xl overflow-hidden group">
                     <div class="w-full h-full bg-cover bg-no-repeat brightness-90 group-hover:brightness-100 transition-all duration-500 select-none pointer-events-none" style="background-image: url('${selectedArt.src}'); background-size: 300% 100%; background-position: 100% 50%;"></div>
                     <div class="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/5 to-white/10 pointer-events-none"></div>
                 </div>
@@ -402,9 +409,9 @@ window.renderCatalog = function(filter = 'all') {
     track.innerHTML = filteredArtworks.map((art, idx) => {
         return `
             <div onclick="selectCarouselSlide(${idx})" 
-                class="carousel-slide absolute w-[240px] sm:w-[340px] md:w-[440px] aspect-[4/3] rounded-3xl overflow-hidden border bg-zinc-950 shadow-2xl cursor-pointer"
+                class="carousel-slide absolute w-[clamp(220px,74vw,440px)] aspect-[4/3] rounded-3xl overflow-hidden border bg-zinc-950 shadow-2xl cursor-pointer"
                 style="transform: scale(0.7); opacity: 0; z-index: 10;">
-                <img src="${art.src}" alt="${art.name}" class="w-full h-full object-cover select-none pointer-events-none">
+                <img src="${art.src}" alt="${art.name}" width="880" height="660" loading="lazy" decoding="async" class="w-full h-full object-cover select-none pointer-events-none">
                 <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none"></div>
             </div>
         `;
@@ -473,9 +480,9 @@ function updateCarousel() {
 
         // Apply active/inactive border and glow styles
         if (diff === 0) {
-            slide.className = "carousel-slide absolute w-[240px] sm:w-[340px] md:w-[440px] aspect-[4/3] rounded-3xl overflow-hidden border-2 border-red-500 shadow-red-glow cursor-pointer";
+            slide.className = "carousel-slide absolute w-[clamp(220px,74vw,440px)] aspect-[4/3] rounded-3xl overflow-hidden border-2 border-red-500 shadow-red-glow cursor-pointer";
         } else {
-            slide.className = "carousel-slide absolute w-[240px] sm:w-[340px] md:w-[440px] aspect-[4/3] rounded-3xl overflow-hidden border border-white/10 bg-zinc-950 shadow-2xl cursor-pointer";
+            slide.className = "carousel-slide absolute w-[clamp(220px,74vw,440px)] aspect-[4/3] rounded-3xl overflow-hidden border border-white/10 bg-zinc-950 shadow-2xl cursor-pointer";
         }
     });
 
@@ -680,8 +687,13 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 1. Load Background Particles
-    initThreeBg();
+    // 1. Load decorative particles after primary content can render.
+    const startThreeBg = () => initThreeBg();
+    if ('requestIdleCallback' in window) {
+        window.requestIdleCallback(startThreeBg, { timeout: 1200 });
+    } else {
+        window.setTimeout(startThreeBg, 400);
+    }
 
     // 2. Setup Virtual room selectors
     window.setRoom('studio');

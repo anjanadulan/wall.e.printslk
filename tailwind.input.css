@@ -1,0 +1,14 @@
+@import "tailwindcss";
+
+@source "./index.html";
+@source "./app.js";
+
+@theme {
+    --font-sans: "Nunito", sans-serif;
+    --font-tech: "Source Code Pro", monospace;
+    --font-display: "Space Grotesk", sans-serif;
+    --font-serif: "Montserrat", sans-serif;
+    --shadow-glass: inset 0 1px 1px rgba(255, 255, 255, 0.1), 0 8px 32px rgba(0, 0, 0, 0.3);
+    --shadow-red-glow: 0 0 30px rgba(239, 68, 68, 0.35);
+    --shadow-dark-red-glow: 0 0 30px rgba(185, 28, 28, 0.25);
+}
