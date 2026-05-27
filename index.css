@@ -1,20 +1,54 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Nunito:wght@300;400;500;600;700&family=Source+Code+Pro:wght@400;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 
+/* ============================================
+   MOBILE-FIRST DESIGN SYSTEM
+   Base: 320px → scales up to desktop
+   ============================================ */
+
 :root {
     --red-glow: 0 0 30px rgba(239, 68, 68, 0.45);
     --dark-red-glow: 0 0 30px rgba(185, 28, 28, 0.3);
     --neon-red: #ef4444;
     --neon-crimson: #b91c1c;
     --neon-orange: #f97316;
+    /* Touch target minimum (WCAG 2.5.5) */
+    --min-touch: 44px;
+    /* Safe area for notched phones */
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-left: env(safe-area-inset-left, 0px);
+    --safe-right: env(safe-area-inset-right, 0px);
 }
 
+/* Base typography: 16px minimum for mobile readability */
 html {
     scroll-behavior: smooth;
+    font-size: 16px;
+    -webkit-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
 }
 
-/* Custom Scrollbar */
+/* Prevent horizontal overflow on all screens */
+body {
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    padding-top: var(--safe-top);
+    padding-bottom: var(--safe-bottom);
+    /* Prevent tap highlight flash on mobile */
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* Ensure images never overflow containers */
+img, video, canvas, svg {
+    max-width: 100%;
+    height: auto;
+}
+
+/* ============================================
+   CUSTOM SCROLLBAR (hidden on mobile, visible desktop)
+   ============================================ */
 .custom-scrollbar::-webkit-scrollbar {
-    width: 8px;
+    width: 6px;
 }
 .custom-scrollbar::-webkit-scrollbar-track {
     background: #050505;
@@ -28,7 +62,17 @@ html {
     background: rgba(239, 68, 68, 0.5);
 }
 
-/* Glassmorphism Classes */
+/* Hide scrollbar on mobile for cleaner look */
+@media (max-width: 768px) {
+    .custom-scrollbar::-webkit-scrollbar {
+        width: 0;
+        display: none;
+    }
+}
+
+/* ============================================
+   GLASSMORPHISM PANELS
+   ============================================ */
 .glass-panel {
     background: rgba(255, 255, 255, 0.02);
     backdrop-filter: blur(16px);
@@ -43,7 +87,21 @@ html {
     border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
-/* Gradients & Animations */
+/* Reduce blur intensity on mobile for perf */
+@media (max-width: 768px) {
+    .glass-panel {
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+    }
+    .glass-panel-heavy {
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+    }
+}
+
+/* ============================================
+   GRID PATTERN BACKGROUND
+   ============================================ */
 .bg-grid-pattern {
     background-size: 40px 40px;
     background-image: 
@@ -51,7 +109,9 @@ html {
         linear-gradient(to bottom, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
 }
 
-/* Floating Animation */
+/* ============================================
+   ANIMATIONS (with reduced-motion support)
+   ============================================ */
 @keyframes float {
     0%, 100% {
         transform: translateY(0px) rotate(0deg);
@@ -65,7 +125,6 @@ html {
     animation: float 6s ease-in-out infinite;
 }
 
-/* Soft Glow Text Pulse */
 @keyframes textGlow {
     0%, 100% {
         text-shadow: 0 0 10px rgba(239, 68, 68, 0.2), 0 0 20px rgba(239, 68, 68, 0.1);
@@ -79,7 +138,19 @@ html {
     animation: textGlow 4s ease-in-out infinite;
 }
 
-/* Room Mockup Shadows & Frames */
+/* Respect user preference for reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .animate-float,
+    .glow-text-pulse,
+    .carousel-slide {
+        animation: none !important;
+        transition: none !important;
+    }
+}
+
+/* ============================================
+   ROOM PREVIEW SHADOWS & AMBIENT EFFECTS
+   ============================================ */
 .print-shadow-single {
     box-shadow: 0 15px 45px rgba(0, 0, 0, 0.95), 0 0 20px rgba(0, 0, 0, 0.4);
 }
@@ -88,15 +159,16 @@ html {
     box-shadow: 0 12px 35px rgba(0, 0, 0, 0.9), 0 0 15px rgba(0, 0, 0, 0.4);
 }
 
-/* Interactive Room Wall Overlay & Light Adjustment */
 .warm-office-ambient {
-    box-shadow: inset 0 0 100px rgba(239, 68, 68, 0.12); /* ambient red glow */
+    box-shadow: inset 0 0 100px rgba(239, 68, 68, 0.12);
 }
 .cozy-living-ambient {
-    box-shadow: inset 0 0 120px rgba(249, 115, 22, 0.08); /* ambient orange glow */
+    box-shadow: inset 0 0 120px rgba(249, 115, 22, 0.08);
 }
 
-/* Border glow transition */
+/* ============================================
+   INTERACTIVE HOVER EFFECTS
+   ============================================ */
 .glow-border-hover {
     transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -106,7 +178,13 @@ html {
     transform: translateY(-2px);
 }
 
-/* Card Zooming & Highlight effect */
+/* Disable hover transforms on touch devices (prevents sticky hover) */
+@media (hover: none) {
+    .glow-border-hover:hover {
+        transform: none;
+    }
+}
+
 .product-card-zoom {
     transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -117,7 +195,9 @@ html {
     opacity: 0.15;
 }
 
-/* Floating Navigation Item transitions */
+/* ============================================
+   NAVIGATION
+   ============================================ */
 .nav-link {
     position: relative;
     transition: color 0.3s ease;
@@ -138,7 +218,9 @@ html {
     transform: translateX(-50%) scaleX(1);
 }
 
-/* Triptych splits background positions */
+/* ============================================
+   TRIPTYCH SPLIT POSITIONS
+   ============================================ */
 .split-left {
     background-position: 0% 50%;
 }
@@ -149,7 +231,173 @@ html {
     background-position: 100% 50%;
 }
 
-/* Coverflow Carousel slide transitions */
+/* ============================================
+   CAROUSEL TRANSITIONS
+   ============================================ */
 .carousel-slide {
-    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.6s ease, box-shadow 0.6s ease;
+    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+                opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+                border-color 0.6s ease,
+                box-shadow 0.6s ease;
+}
+
+/* ============================================
+   MOBILE-SPECIFIC LAYOUT OVERRIDES
+   ============================================ */
+
+/* --- Navigation: compact on mobile --- */
+@media (max-width: 768px) {
+    /* Ensure nav doesn't clip or overflow */
+    nav {
+        width: 95% !important;
+        max-width: 100% !important;
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+        height: auto !important;
+        min-height: 52px;
+        top: 0.5rem !important;
+        gap: 0.25rem;
+    }
+    /* Hide the "Available" status pill on very small screens */
+    nav > div:last-child {
+        display: none;
+    }
+    /* Shrink nav link text */
+    nav a, nav div a {
+        font-size: 0.65rem !important;
+        padding: 0.4rem 0.5rem !important;
+    }
+    /* Brand text smaller */
+    nav > a span {
+        font-size: 0.75rem !important;
+    }
+    nav > a img {
+        width: 1.5rem !important;
+        height: 1.5rem !important;
+    }
+}
+
+@media (max-width: 380px) {
+    /* Ultra-small: show only logo, hide brand text */
+    nav > a span {
+        display: none !important;
+    }
+}
+
+/* --- Hero Section --- */
+@media (max-width: 768px) {
+    header.min-h-screen {
+        min-height: 100svh; /* use small viewport height for mobile */
+        padding-top: 5rem;
+        padding-left: 1.25rem;
+        padding-right: 1.25rem;
+    }
+}
+
+/* --- Room Previewer: stack panels vertically --- */
+@media (max-width: 1024px) {
+    /* Let the wall preview take full width when stacked */
+    #previewer .lg\:col-span-4,
+    #previewer .lg\:col-span-8 {
+        grid-column: span 12 / span 12;
+    }
+}
+
+@media (max-width: 640px) {
+    /* Scale down triptych panels on small screens */
+    #wall-mockup-wrapper {
+        transform: scale(0.65);
+        transform-origin: center center;
+    }
+}
+
+/* --- Pricing Table: horizontal scroll on tiny screens --- */
+@media (max-width: 480px) {
+    table {
+        display: block;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        white-space: nowrap;
+    }
+    table td, table th {
+        white-space: nowrap;
+        padding: 0.6rem 0.5rem;
+        font-size: 0.7rem;
+    }
+}
+
+/* --- Quote Calculator: full width on mobile --- */
+@media (max-width: 640px) {
+    #contact .lg\:col-span-5,
+    #contact .lg\:col-span-7 {
+        grid-column: span 12 / span 12;
+    }
+}
+
+/* --- Touch targets: all interactive elements minimum 44px --- */
+@media (max-width: 768px) {
+    button, a, select, input[type="checkbox"], label {
+        min-height: var(--min-touch);
+        min-width: var(--min-touch);
+    }
+    select, input[type="number"], textarea {
+        font-size: 16px !important; /* Prevents iOS zoom on focus */
+        min-height: var(--min-touch);
+        padding: 0.75rem 1rem;
+    }
+}
+
+/* --- Image Popup Modal mobile-friendly --- */
+@media (max-width: 640px) {
+    #image-popup-modal > div {
+        max-width: 98% !important;
+        border-radius: 1rem !important;
+    }
+    #image-popup-modal img {
+        max-height: 60vh !important;
+    }
+    #image-popup-modal button {
+        top: 0.75rem !important;
+        right: 0.75rem !important;
+    }
+}
+
+/* --- Carousel: reduce dimensions on mobile --- */
+@media (max-width: 640px) {
+    #carousel-track {
+        min-height: 200px;
+    }
+}
+
+/* --- Estimated Price block: stack vertically on mobile --- */
+@media (max-width: 480px) {
+    #contact .flex.flex-col.sm\:flex-row {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+}
+
+/* ============================================
+   PERFORMANCE: GPU-ACCELERATED TRANSFORMS
+   ============================================ */
+.carousel-slide,
+#wall-mockup-wrapper,
+#room-backdrop {
+    will-change: transform;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+}
+
+/* ============================================
+   ACCESSIBILITY: FOCUS STYLES
+   ============================================ */
+button:focus-visible,
+a:focus-visible,
+select:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+    outline: 2px solid var(--neon-red);
+    outline-offset: 2px;
+    border-radius: 0.5rem;
 }
