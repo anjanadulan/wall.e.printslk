@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wall-E Prints - Thank You Card Studio</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link crossorigin="anonymous" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Nunito:wght@300;400;500;600;700&family=Source+Code+Pro:wght@400;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- QRCode.js CDN for dynamic QR code generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <!-- html2canvas for High-Quality PNG Exporting -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Nunito"', 'sans-serif'],
+                        tech: ['"Source Code Pro"', 'monospace'],
+                        display: ['"Space Grotesk"', 'sans-serif'],
+                        serif: ['"Montserrat"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Prevents horizontal scroll on smaller viewports */
+        body {
+            overflow-x: hidden;
+        }
+
+        /* Style customization for seamless design conversion */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #0f1115;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #2b2d35;
+            border-radius: 10px;
+        }
+
+        /* Fixed coordinate elements designed for pixel accuracy */
+        .card-native {
+            width: 1000px;
+            height: 625px;
+            box-sizing: border-box;
+            position: relative;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        /* Enforce exact QR code sizes inside html2canvas exports */
+        #preview-main-card-qr img, #preview-main-card-qr canvas,
+        #export-main-card-qr img, #export-main-card-qr canvas {
+            width: 100px !important;
+            height: 100px !important;
+        }
+    </style>
+</head>
+<body class="bg-[#0b0c10] text-[#c5c6c7] font-sans min-h-screen flex flex-col antialiased selection:bg-purple-500 selection:text-white">
+
+    <!-- Header Section -->
+    <header class="no-print border-b border-gray-800 bg-[#12141a]/90 backdrop-blur-md sticky top-0 z-50 px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-purple-600 to-indigo-500 flex items-center justify-center shadow-lg shadow-purple-500/20">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg>
+            </div>
+            <div>
+                <h1 class="text-xl font-display font-black tracking-wider text-white uppercase flex items-center gap-2">
+                    Wall-E <span class="text-purple-500 font-sans font-semibold text-xs py-0.5 px-2 rounded-full border border-purple-500/30 bg-purple-500/10">Studio</span>
+                </h1>
+                <p class="text-[10px] text-gray-500 tracking-wider">PREMIUM THANK YOU CARD GENERATOR</p>
+            </div>
+        </div>
+
+        <div class="flex items-center space-x-3">
+            <!-- Download PNG Action Button -->
+            <button onclick="downloadPNG(event)" class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold px-5 py-2.5 rounded-xl text-sm flex items-center gap-2 transition shadow-lg shadow-emerald-500/20 active:scale-95">
+                <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                </svg>
+                <span>Download PNG</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Workspace Container -->
+    <main class="flex-1 max-w-[1600px] w-full mx-auto p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 no-print">
+        
+        <!-- Left Panel: Control Center & Customizer -->
+        <section class="lg:col-span-5 bg-[#12141a]/90 border border-gray-800 rounded-3xl p-6 space-y-6 shadow-2xl h-[calc(100vh-130px)] overflow-y-auto custom-scrollbar">
+            <div>
+                <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-purple-500"></span> Customize Card Data
+                </h2>
+                <p class="text-xs text-gray-500">All text wrapping and layout parameters will remain exactly identical on export.</p>
+            </div>
+
+            <!-- Choose Aesthetic/Theme -->
+            <div class="space-y-3">
+                <label class="text-xs font-semibold tracking-wider text-gray-400 uppercase">1. Select Aesthetic Style</label>
+                <div class="grid grid-cols-3 gap-3">
+                    <button onclick="changeTheme('neon')" id="btn-theme-neon" class="border-2 border-purple-600 bg-purple-500/10 hover:bg-purple-500/20 text-white rounded-xl py-3 px-2 text-center transition flex flex-col items-center gap-1">
+                        <span class="w-4 h-4 rounded-full bg-gradient-to-tr from-purple-500 to-indigo-500"></span>
+                        <span class="text-xs font-bold">Neon Stance</span>
+                    </button>
+                    <button onclick="changeTheme('minimal')" id="btn-theme-minimal" class="border border-gray-800 bg-gray-900/40 hover:bg-gray-900/60 text-gray-400 hover:text-white rounded-xl py-3 px-2 text-center transition flex flex-col items-center gap-1">
+                        <span class="w-4 h-4 rounded-full bg-gradient-to-tr from-yellow-600 to-amber-400"></span>
+                        <span class="text-xs font-bold">Matte Luxury</span>
+                    </button>
+                    <button onclick="changeTheme('cyber')" id="btn-theme-cyber" class="border border-gray-800 bg-gray-900/40 hover:bg-gray-900/60 text-gray-400 hover:text-white rounded-xl py-3 px-2 text-center transition flex flex-col items-center gap-1">
+                        <span class="w-4 h-4 rounded-full bg-gradient-to-tr from-emerald-500 to-cyan-500"></span>
+                        <span class="text-xs font-bold">Cyan Shift</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Identity Editing -->
+            <div class="space-y-4 border-t border-gray-800/60 pt-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-2">
+                        <label class="text-xs text-gray-400">Shop Title</label>
+                        <input type="text" id="input-title" oninput="syncText()" value="Wall-E Prints" class="w-full bg-[#1c1f26] border border-gray-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-purple-500 transition">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-xs text-gray-400">Tagline</label>
+                        <input type="text" id="input-tagline" oninput="syncText()" value="Premium Bespoke Wall Art" class="w-full bg-[#1c1f26] border border-gray-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-purple-500 transition">
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <label class="text-xs text-gray-400">Personalized Message</label>
+                    <textarea id="input-message" oninput="syncText()" rows="3" class="w-full bg-[#1c1f26] border border-gray-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-purple-500 transition leading-relaxed">Thank you for supporting our business! We hope this premium print perfectly transforms your setup. Scan the QR code or visit our page to share your wall setup!</textarea>
+                </div>
+            </div>
+
+            <!-- Promotion & Loyalty Engine -->
+            <div class="space-y-4 border-t border-gray-800/60 pt-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-2">
+                        <label class="text-xs text-gray-400">Coupon Code</label>
+                        <input type="text" id="input-coupon" oninput="syncText()" value="WALLE10" class="w-full bg-[#1c1f26] border border-gray-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-purple-500 transition uppercase tracking-wider font-mono">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-xs text-gray-400">Discount Highlight</label>
+                        <input type="text" id="input-discount" oninput="syncText()" value="10% OFF NEXT ORDER" class="w-full bg-[#1c1f26] border border-gray-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-purple-500 transition">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Social Contacts -->
+            <div class="space-y-4 border-t border-gray-800/60 pt-4">
+                <div class="space-y-2">
+                    <label class="text-xs text-gray-400">WhatsApp Contact</label>
+                    <input type="text" id="input-phone" oninput="syncText()" value="+94 71 635 4922" class="w-full bg-[#1c1f26] border border-gray-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-purple-500 transition">
+                </div>
+                <div class="space-y-2">
+                    <label class="text-xs text-gray-400">QR Code Link (Reviews / Portfolio)</label>
+                    <input type="url" id="input-qr" onchange="generateNewQR()" value="https://www.instagram.com/wall.e.printslk" class="w-full bg-[#1c1f26] border border-gray-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-purple-500 transition text-xs">
+                </div>
+            </div>
+        </section>
+
+        <!-- Right Panel: Creative Live Previewer -->
+        <section class="lg:col-span-7 flex flex-col space-y-6 items-center justify-center p-4">
+            <!-- Mode 1: Single Card Interactive Showcase with Hardware Scale Engine -->
+            <div id="single-preview-mode" class="w-full flex items-center justify-center py-6">
+                <div id="preview-card-wrapper" class="w-full max-w-[520px] aspect-[1.6/1] overflow-hidden relative rounded-2xl shadow-2xl" style="background: transparent;">
+                    <!-- The exact 1000x625px physical element is placed inside here and scaled visually -->
+                    <div id="card-inner-element" class="card-native origin-top-left rounded-2xl">
+                        <!-- Design layout injected here dynamically by js to guarantee 100% code parity -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- HIDDEN REAL-SIZE EXPORT CONTAINER (Bypasses rendering bugs & guarantees exact sizing) -->
+    <div class="absolute top-0 left-[-9999px] no-print">
+        <div id="hidden-export-container" class="card-native rounded-2xl">
+            <!-- Rendered in full unscaled resolution exclusively for html2canvas -->
+        </div>
+    </div>
+
+    <!-- Script Operations -->
+    <script>
+        let currentTheme = 'neon';
+
+        // Initialize and maintain card dimensions
+        window.onload = function() {
+            syncText();
+            window.addEventListener('resize', resizePreviewCard);
+        }
+
+        // Highly accurate transform scale matcher
+        function resizePreviewCard() {
+            const wrapper = document.getElementById('preview-card-wrapper');
+            const card = document.getElementById('card-inner-element');
+            if (!wrapper || !card) return;
+            
+            const scale = wrapper.offsetWidth / 1000;
+            card.style.transform = `scale(${scale})`;
+            card.style.transformOrigin = 'top left';
+            // Set the wrapper's physical height corresponding to the calculated scaled height
+            wrapper.style.height = `${625 * scale}px`;
+        }
+
+        function changeTheme(themeName) {
+            currentTheme = themeName;
+            
+            // UI elements to update button states
+            document.getElementById('btn-theme-neon').className = "border border-gray-800 bg-gray-900/40 text-gray-400 hover:text-white rounded-xl py-3 px-2 text-center transition flex flex-col items-center gap-1";
+            document.getElementById('btn-theme-minimal').className = "border border-gray-800 bg-gray-900/40 text-gray-400 hover:text-white rounded-xl py-3 px-2 text-center transition flex flex-col items-center gap-1";
+            document.getElementById('btn-theme-cyber').className = "border border-gray-800 bg-gray-900/40 text-gray-400 hover:text-white rounded-xl py-3 px-2 text-center transition flex flex-col items-center gap-1";
+
+            if (themeName === 'neon') {
+                document.getElementById('btn-theme-neon').className = "border-2 border-purple-600 bg-purple-500/10 text-white rounded-xl py-3 px-2 text-center transition flex flex-col items-center gap-1";
+            } else if (themeName === 'minimal') {
+                document.getElementById('btn-theme-minimal').className = "border-2 border-amber-600 bg-amber-500/10 text-white rounded-xl py-3 px-2 text-center transition flex flex-col items-center gap-1";
+            } else if (themeName === 'cyber') {
+                document.getElementById('btn-theme-cyber').className = "border-2 border-emerald-600 bg-emerald-500/10 text-white rounded-xl py-3 px-2 text-center transition flex flex-col items-center gap-1";
+            }
+
+            syncText();
+        }
+
+        // Synchronize and render cards to all containers with absolute pixel accuracy
+        function syncText() {
+            const cardInner = document.getElementById('card-inner-element');
+            const hiddenExport = document.getElementById('hidden-export-container');
+
+            const cardHtml = buildCardHtmlContent('preview-main-card');
+            const exportHtml = buildCardHtmlContent('export-main-card');
+
+            // Apply card layout and styling directly to the native containers to prevent duplicate nesting bugs
+            let themeStyles = "";
+            let borderStyle = "";
+            let textColor = "";
+
+            if (currentTheme === 'neon') {
+                themeStyles = "background: linear-gradient(135deg, #07080f 0%, #141527 50%, #0c0d14 100%);";
+                borderStyle = "border: 2px solid #3c1e70;";
+                textColor = "#c5c6c7";
+            } else if (currentTheme === 'minimal') {
+                themeStyles = "background: linear-gradient(135deg, #0f0f0f 0%, #1e1e1e 50%, #0c0c0c 100%);";
+                borderStyle = "border: 2px solid rgba(245, 158, 11, 0.25);";
+                textColor = "#f59e0b";
+            } else if (currentTheme === 'cyber') {
+                themeStyles = "background: linear-gradient(135deg, #010810 0%, #0b1622 50%, #040f1a 100%);";
+                borderStyle = "border: 2px solid rgba(6, 182, 212, 0.35);";
+                textColor = "#06b6d4";
+            }
+
+            const commonStyles = themeStyles + borderStyle + "color: " + textColor + "; position: relative; overflow: hidden; border-radius: 24px; box-sizing: border-box;";
+
+            cardInner.style.cssText = commonStyles;
+            hiddenExport.style.cssText = commonStyles;
+
+            cardInner.innerHTML = cardHtml;
+            hiddenExport.innerHTML = exportHtml;
+
+            // Generate high-resolution QR codes
+            generateQRCodes();
+
+            // Resize the screen preview card dynamically to match parent boundaries
+            resizePreviewCard();
+        }
+
+        function generateQRCodes() {
+            const qrUrl = document.getElementById('input-qr').value;
+
+            // Generate for preview card
+            const prevQr = document.getElementById('preview-main-card-qr');
+            if (prevQr) {
+                prevQr.innerHTML = "";
+                new QRCode(prevQr, {
+                    text: qrUrl,
+                    width: 100,
+                    height: 100,
+                    colorDark : "#000000",
+                    colorLight : "#ffffff",
+                    correctLevel : QRCode.CorrectLevel.H
+                });
+            }
+
+            // Generate for export card
+            const expQr = document.getElementById('export-main-card-qr');
+            if (expQr) {
+                expQr.innerHTML = "";
+                new QRCode(expQr, {
+                    text: qrUrl,
+                    width: 100,
+                    height: 100,
+                    colorDark : "#000000",
+                    colorLight : "#ffffff",
+                    correctLevel : QRCode.CorrectLevel.H
+                });
+            }
+        }
+
+        // Core HTML Engine for absolute coordinate cards (eliminates layout shifting inside html2canvas canvas exports)
+        function buildCardHtmlContent(uid) {
+            const titleVal = document.getElementById('input-title').value;
+            const taglineVal = document.getElementById('input-tagline').value;
+            const messageVal = document.getElementById('input-message').value;
+            const couponVal = document.getElementById('input-coupon').value;
+            const discountVal = document.getElementById('input-discount').value;
+            const phoneVal = document.getElementById('input-phone').value;
+
+            let accentGlow = "";
+            let textAccent = "";
+
+            if (currentTheme === 'neon') {
+                accentGlow = "background: radial-gradient(circle, rgba(147,51,234,0.15) 0%, rgba(0,0,0,0) 70%);";
+                textAccent = "color: #a78bfa; font-family: 'Source Code Pro', monospace;";
+            } else if (currentTheme === 'minimal') {
+                accentGlow = "background: radial-gradient(circle, rgba(245,158,11,0.08) 0%, rgba(0,0,0,0) 70%);";
+                textAccent = "color: #d97706; font-family: 'Montserrat', sans-serif; font-style: italic;";
+            } else if (currentTheme === 'cyber') {
+                accentGlow = "background: radial-gradient(circle, rgba(6,182,212,0.12) 0%, rgba(0,0,0,0) 70%);";
+                textAccent = "color: #22d3ee; font-family: 'Source Code Pro', monospace;";
+            }
+
+            return `
+                <div style="position: absolute; top: -100px; left: -100px; width: 400px; height: 400px; border-radius: 50%; ${accentGlow} pointer-events: none; z-index: 1;"></div>
+                
+                <!-- Header -->
+                <div style="position: absolute; top: 50px; left: 50px; right: 50px; display: flex; justify-content: space-between; align-items: flex-start; z-index: 10;">
+                    <div>
+                        <h3 style="font-size: 42px; font-weight: 900; letter-spacing: 2px; color: #ffffff; font-family: 'Space Grotesk', sans-serif; text-transform: uppercase; font-style: italic; margin: 0; line-height: 1;">${titleVal}</h3>
+                        <p style="font-size: 15px; font-weight: 600; letter-spacing: 4px; text-transform: uppercase; margin-top: 8px; margin-bottom: 0; ${textAccent}">${taglineVal}</p>
+                    </div>
+                    <span style="font-size: 16px; font-weight: 600; padding: 10px 24px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); border-radius: 50px; color: #e5e7eb; font-family: 'Nunito', sans-serif;">Thank You</span>
+                </div>
+
+                <!-- Main Text Message -->
+                <div style="position: absolute; top: 180px; left: 50px; right: 50px; z-index: 10;">
+                    <p style="font-size: 24px; line-height: 42px; color: #d1d5db; margin: 0; font-weight: 500; font-family: 'Nunito', sans-serif;">
+                        ${messageVal}
+                    </p>
+                </div>
+
+                <!-- Divider Line -->
+                <div style="position: absolute; bottom: 200px; left: 50px; right: 50px; height: 1px; background: rgba(255,255,255,0.08); z-index: 10;"></div>
+
+                <!-- Footer: Left (Coupon) -->
+                <div style="position: absolute; bottom: 50px; left: 50px; z-index: 10; display: flex; flex-direction: column;">
+                    <p style="font-size: 14px; color: #9ca3af; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700; margin: 0 0 10px 0; font-family: 'Nunito', sans-serif;">${discountVal}</p>
+                    <div style="background: rgba(147, 51, 234, 0.12); border: 1.5px solid rgba(147, 51, 234, 0.45); border-radius: 8px; padding: 8px 24px; display: flex; align-items: center; justify-content: center; height: 45px; box-sizing: border-box;">
+                        <span style="font-size: 22px; font-family: 'Source Code Pro', monospace; font-weight: 800; color: #f3e8ff; letter-spacing: 2px; line-height: 1;">${couponVal}</span>
+                    </div>
+                </div>
+
+                <!-- Footer: Right (Contacts & QR) -->
+                <div style="position: absolute; bottom: 50px; right: 50px; z-index: 10; display: flex; align-items: center;">
+                    <div style="text-align: right; margin-right: 30px;">
+                        <p style="font-size: 13px; color: #9ca3af; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700; margin: 0 0 4px 0; font-family: 'Nunito', sans-serif;">WHATSAPP ORDER</p>
+                        <p style="font-size: 24px; font-weight: 800; color: #ffffff; margin: 0; font-family: 'Source Code Pro', monospace;">${phoneVal}</p>
+                    </div>
+                    <div id="${uid}-qr" style="width: 120px; height: 120px; background: white; padding: 10px; border-radius: 12px; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 25px rgba(0,0,0,0.3); box-sizing: border-box;">
+                        <!-- QR Injected Here -->
+                    </div>
+                </div>
+            `;
+        }
+
+        function generateNewQR() {
+            syncText();
+        }
+
+        // Bypasses layout shifting by capturing unscaled pixel-perfect canvas
+        function downloadPNG(event) {
+            const target = document.getElementById('hidden-export-container');
+            const fileName = 'wall-e-thank-you-card.png';
+
+            if (!target) return;
+
+            const btn = event.currentTarget;
+            const originalHtml = btn.innerHTML;
+
+            btn.innerHTML = `
+                <svg class="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>Exporting...</span>
+            `;
+            btn.disabled = true;
+
+            const options = {
+                backgroundColor: null,
+                scale: 2.5, // 2.5x crisp rendering factor
+                useCORS: true,
+                allowTaint: true,
+                logging: false
+            };
+
+            setTimeout(() => {
+                html2canvas(target, options).then(canvas => {
+                    const link = document.createElement('a');
+                    link.download = fileName;
+                    link.href = canvas.toDataURL('image/png', 1.0);
+                    link.click();
+                    
+                    btn.innerHTML = originalHtml;
+                    btn.disabled = false;
+                }).catch(err => {
+                    console.error('Exporting Failed:', err);
+                    btn.innerHTML = originalHtml;
+                    btn.disabled = false;
+                });
+            }, 200);
+        }
+    </script>
+</body>
+</html>

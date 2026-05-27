@@ -1,0 +1,700 @@
+// Wall-E Prints - Interactive Client Script
+
+// Preview Artwork Database (loaded from src/port and src/hori for preview only)
+const previewArtworks = [
+    // Portrait (Standard - from src/port)
+    { id: 'port1', name: 'Porsche 911 RSR', src: 'src/port/911.jpg', type: 'standard' },
+    { id: 'port2', name: 'Porsche 911 Sunset', src: 'src/port/911-2.jpg', type: 'standard' },
+    { id: 'port3', name: 'Demon Slayer', src: 'src/port/dem.jpg', type: 'standard' },
+    { id: 'port4', name: 'Jujutsu Kaisen Gojo', src: 'src/port/juju.jpg', type: 'standard' },
+    { id: 'port5', name: 'One Piece Luffy', src: 'src/port/op.jpg', type: 'standard' },
+    // Landscape (Triptych - from src/hori)
+    { id: 'hori1', name: 'BMW M Power', src: 'src/hori/bm.jpg', type: 'triptych' },
+    { id: 'hori2', name: 'F1 Racing Car', src: 'src/hori/f1.jpg', type: 'triptych' },
+    { id: 'hori3', name: 'Spider-Gwen Cyberpunk', src: 'src/hori/gwen.jpg', type: 'triptych' },
+    { id: 'hori4', name: 'Cyberpunk Samurai', src: 'src/hori/samu.jpg', type: 'triptych' },
+    { id: 'hori5', name: 'Venom Neon Glow', src: 'src/hori/ven.jpg', type: 'triptych' }
+];
+
+// Art Gallery Database (loaded from src/prints only, used for works section)
+const artworks = [
+    {
+        id: 'img1',
+        name: 'Anime and Car Art Collection',
+        src: 'src/prints/img1.jpg',
+        category: 'automotive',
+        price: 300,
+        desc: 'This image displays five different stylized art prints laid out together on a glass table. The collection features a mix of dramatic anime characters, including the chibi Zoro print, alongside a sleek top-down view of a Porsche 911R sports car. Each poster uses high-contrast colors and a modern, artistic design style.'
+    },
+    {
+        id: 'img2',
+        name: 'Supra Midnight Glow',
+        src: 'src/prints/img2.jpg',
+        category: 'automotive',
+        price: 1000,
+        desc: 'Classic JDM street icon captured under cyber-neon lights. Printed with precision density calibration for deep black levels on glare-free heavy matte stock.'
+    },
+    {
+        id: 'img3',
+        name: 'Interstellar and Demon Slayer',
+        src: 'src/prints/img3.jpg',
+        category: 'anime',
+        price: 300,
+        desc: 'The poster on the left shows an astronaut in profile wearing a white space helmet, with the movie title "INTERSTELLAR" printed at the bottom. The poster on the right features a close-up portrait of the anime character Giyu Tomioka with striking blue eyes, set against a background of black-and-white manga comic panels.'
+    },
+    {
+        id: 'img4',
+        name: 'Art Prints Collection',
+        src: 'src/prints/img4.jpg',
+        category: 'gaming',
+        price: 300,
+        desc: 'The top poster displays a red and white racing motorcycle with the name "MARQUEZ" printed in large white letters. The bottom-left print shows a samurai in full armor standing amidst a field of vibrant red spider lilies, while the bottom-right print features an intense, close-up portrait of a fierce anime character enveloped in dark red energy.'
+    },
+    {
+        id: 'img5',
+        name: 'Chibi Zoro',
+        src: 'src/prints/img5.jpg',
+        category: 'anime',
+        price: 300,
+        desc: 'This poster features a small, intense version of the anime character Zoro from One Piece standing amidst glowing red flames. He has bright green spiky hair and carries his signature katanas in a dark, dramatic battle scene.'
+    }
+];
+
+// Interactive Previewer State
+let currentRoom = 'studio';
+let currentArtId = 'port1';
+let currentFormat = 'single';
+
+// Three.js Background Particle Renderer
+let scene, camera, renderer, particles, floatingFrames = [];
+let mouseX = 0, mouseY = 0;
+let targetX = 0, targetY = 0;
+
+// Listen for mousemove to create interactive parallax
+window.addEventListener('mousemove', (event) => {
+    mouseX = (event.clientX - window.innerWidth / 2) / 70;
+    mouseY = (event.clientY - window.innerHeight / 2) / 70;
+});
+
+function initThreeBg() {
+    const container = document.getElementById('three-bg-canvas');
+    if (!container) return;
+
+    try {
+        scene = new THREE.Scene();
+        camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.z = 30;
+
+        renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        container.appendChild(renderer.domElement);
+
+        // Particle Points (Enhanced visibility count)
+        const particleCount = 350;
+        const geometry = new THREE.BufferGeometry();
+        const positions = new Float32Array(particleCount * 3);
+        const colors = new Float32Array(particleCount * 3);
+
+        const colorRed = new THREE.Color('#ef4444');
+        const colorDarkRed = new THREE.Color('#991b1b'); // slightly brighter than 7f1d1d to pop
+
+        for (let i = 0; i < particleCount; i++) {
+            positions[i * 3] = (Math.random() - 0.5) * 80;
+            positions[i * 3 + 1] = (Math.random() - 0.5) * 80;
+            positions[i * 3 + 2] = (Math.random() - 0.5) * 50;
+
+            const mixedColor = Math.random() > 0.5 ? colorRed : colorDarkRed;
+            colors[i * 3] = mixedColor.r;
+            colors[i * 3 + 1] = mixedColor.g;
+            colors[i * 3 + 2] = mixedColor.b;
+        }
+
+        geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+        // Generate circular radial texture
+        const pCanvas = document.createElement('canvas');
+        pCanvas.width = 16;
+        pCanvas.height = 16;
+        const pCtx = pCanvas.getContext('2d');
+        const gradient = pCtx.createRadialGradient(8, 8, 0, 8, 8, 8);
+        gradient.addColorStop(0, 'rgba(255,255,255,1.0)'); // full opacity center
+        gradient.addColorStop(1, 'rgba(255,255,255,0)');
+        pCtx.fillStyle = gradient;
+        pCtx.fillRect(0, 0, 16, 16);
+        const particleTexture = new THREE.CanvasTexture(pCanvas);
+
+        // Material with increased size and opacity for better visibility
+        const material = new THREE.PointsMaterial({
+            size: 1.2,
+            map: particleTexture,
+            vertexColors: true,
+            transparent: true,
+            opacity: 0.85,
+            depthWrite: false,
+            blending: THREE.AdditiveBlending
+        });
+
+        particles = new THREE.Points(geometry, material);
+        scene.add(particles);
+
+        // Create rotating wireframe frames (simulating floating A4 posters) - increased count & opacity
+        const frameMaterial = new THREE.MeshBasicMaterial({
+            color: 0xef4444,
+            wireframe: true,
+            transparent: true,
+            opacity: 0.25
+        });
+
+        for (let i = 0; i < 8; i++) {
+            const w = Math.random() * 8 + 4;
+            const h = w * 1.414; // A4 Aspect Ratio
+            const frameGeo = new THREE.PlaneGeometry(w, h);
+            const mesh = new THREE.Mesh(frameGeo, frameMaterial);
+            
+            mesh.position.set(
+                (Math.random() - 0.5) * 60,
+                (Math.random() - 0.5) * 40,
+                (Math.random() - 0.5) * 20 - 5
+            );
+            mesh.rotation.set(
+                Math.random() * Math.PI,
+                Math.random() * Math.PI,
+                0
+            );
+            mesh.userData = {
+                rotX: (Math.random() - 0.5) * 0.005,
+                rotY: (Math.random() - 0.5) * 0.005,
+                floatOffset: Math.random() * 100
+            };
+            
+            scene.add(mesh);
+            floatingFrames.push(mesh);
+        }
+
+        const clock = new THREE.Clock();
+        function animate() {
+            requestAnimationFrame(animate);
+            const elapsed = clock.getElapsedTime();
+
+            if (particles) {
+                particles.rotation.y = elapsed * 0.025;
+                particles.rotation.x = elapsed * 0.012;
+            }
+
+            // Smooth parallax tracking
+            targetX += (mouseX - targetX) * 0.05;
+            targetY += (mouseY - targetY) * 0.05;
+            camera.position.x = targetX;
+            camera.position.y = -targetY;
+            camera.lookAt(scene.position);
+
+            floatingFrames.forEach(frame => {
+                frame.rotation.x += frame.userData.rotX;
+                frame.rotation.y += frame.userData.rotY;
+                frame.position.y += Math.sin(elapsed + frame.userData.floatOffset) * 0.006;
+            });
+
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+    } catch (err) {
+        console.warn("Three.js not supported or canvas failed. Falling back to CSS static effects.", err);
+    }
+}
+
+// Room Selection Handler
+window.setRoom = function(room) {
+    currentRoom = room;
+    const backdrop = document.getElementById('room-backdrop');
+    if (!backdrop) return;
+
+    const btnStudio = document.getElementById('btn-room-studio');
+    const btnLiving = document.getElementById('btn-room-living');
+
+    if (room === 'studio') {
+        backdrop.style.backgroundImage = "url('https://images.unsplash.com/photo-1616440347437-b1c73416efc2?auto=format&fit=crop&w=1200&q=80')";
+        backdrop.className = "absolute inset-0 bg-cover bg-center transition-all duration-700 select-none scale-105 filter brightness-[0.4] warm-office-ambient";
+        
+        btnStudio.className = "border border-red-500/50 bg-red-500/10 text-white text-xs font-semibold py-3 px-2 rounded-xl transition";
+        btnLiving.className = "border border-gray-800 bg-gray-900/40 text-gray-400 text-xs font-semibold py-3 px-2 rounded-xl transition";
+    } else {
+        backdrop.style.backgroundImage = "url('https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1200&q=80')";
+        backdrop.className = "absolute inset-0 bg-cover bg-center transition-all duration-700 select-none scale-105 filter brightness-[0.4] cozy-living-ambient";
+        
+        btnLiving.className = "border border-red-500/50 bg-red-500/10 text-white text-xs font-semibold py-3 px-2 rounded-xl transition";
+        btnStudio.className = "border border-gray-800 bg-gray-900/40 text-gray-400 text-xs font-semibold py-3 px-2 rounded-xl transition";
+    }
+};
+
+// Mount format configurer
+window.setPreviewFormat = function(format) {
+    currentFormat = format;
+
+    // Filter target active art list based on selected mode
+    const activeArtList = previewArtworks.filter(art => art.type === (format === 'single' ? 'standard' : 'triptych'));
+    
+    // Automatically switch currentArtId to the first item in the new category
+    const hasSameArtType = previewArtworks.find(art => art.id === currentArtId && art.type === (format === 'single' ? 'standard' : 'triptych'));
+    if (!hasSameArtType && activeArtList.length > 0) {
+        currentArtId = activeArtList[0].id;
+    }
+
+    const btnSingle = document.getElementById('btn-format-single');
+    const btnTriptych = document.getElementById('btn-format-triptych');
+    const spanSingleSub = btnSingle.querySelector('span:last-child');
+    const spanTriptychSub = btnTriptych.querySelector('span:last-child');
+
+    if (format === 'single') {
+        btnSingle.className = "border border-red-500/50 bg-red-500/10 text-white py-3.5 px-3 rounded-xl transition flex flex-col items-center gap-1.5";
+        btnTriptych.className = "border border-gray-800 bg-gray-900/40 text-gray-400 py-3.5 px-3 rounded-xl transition flex flex-col items-center gap-1.5";
+        if (spanSingleSub) spanSingleSub.className = "text-[9px] text-red-400 font-tech";
+        if (spanTriptychSub) spanTriptychSub.className = "text-[9px] text-gray-500";
+    } else {
+        btnTriptych.className = "border border-red-500/50 bg-red-500/10 text-white py-3.5 px-3 rounded-xl transition flex flex-col items-center gap-1.5";
+        btnSingle.className = "border border-gray-800 bg-gray-900/40 text-gray-400 py-3.5 px-3 rounded-xl transition flex flex-col items-center gap-1.5";
+        if (spanTriptychSub) spanTriptychSub.className = "text-[9px] text-red-400 font-tech";
+        if (spanSingleSub) spanSingleSub.className = "text-[9px] text-gray-500";
+    }
+
+    renderArtSelectors();
+    updateWallPreview();
+};
+
+// Select artwork helper
+window.selectArt = function(id) {
+    currentArtId = id;
+    renderArtSelectors();
+    updateWallPreview();
+};
+
+// Render mini choices inside Room Previewer control
+function renderArtSelectors() {
+    const selector = document.getElementById('preview-art-selector');
+    if (!selector) return;
+
+    const activeArtList = previewArtworks.filter(art => art.type === (currentFormat === 'single' ? 'standard' : 'triptych'));
+
+    selector.innerHTML = activeArtList.map(art => {
+        const isActive = art.id === currentArtId;
+        return `
+            <button onclick="selectArt('${art.id}')" 
+                id="select-art-${art.id}"
+                class="relative aspect-square border-2 rounded-xl overflow-hidden transition-all duration-300 hover:scale-105 hover:border-red-500/70 ${isActive ? 'border-red-500 shadow-red-glow' : 'border-gray-800'}"
+                title="${art.name}">
+                <img src="${art.src}" class="w-full h-full object-cover brightness-75 hover:brightness-100 transition select-none pointer-events-none">
+                ${isActive ? '<div class="absolute inset-0 border-2 border-red-500 pointer-events-none rounded-xl"></div>' : ''}
+            </button>
+        `;
+    }).join('');
+}
+
+// Update Artwork Render on Room Wall
+function updateWallPreview() {
+    const wrapper = document.getElementById('wall-mockup-wrapper');
+    if (!wrapper) return;
+
+    const selectedArt = previewArtworks.find(art => art.id === currentArtId);
+    if (!selectedArt) return;
+
+    let html = '';
+    let price = 300;
+    let desc = '';
+
+    if (currentFormat === 'single') {
+        price = 300;
+        desc = `A4 single-page print of "${selectedArt.name}" on Standard 230GSM Gloss photo stock. Edge-to-edge borderless trim.`;
+        html = `
+            <div class="relative w-[180px] h-[254px] border-[5px] border-zinc-950 bg-black rounded shadow-2xl transition-all duration-500 hover:scale-[1.03] group overflow-hidden">
+                <img src="${selectedArt.src}" class="w-full h-full object-cover brightness-90 group-hover:brightness-100 transition-all duration-500 select-none pointer-events-none">
+                <div class="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/5 to-white/12 pointer-events-none"></div>
+            </div>
+        `;
+    } else {
+        price = 1000;
+        desc = `Signature Triptych 3-panel split of "${selectedArt.name}". Cleanly divided across 3 standard A4 frames, generating a 3D split visual. Built with 230GSM Gloss.`;
+        html = `
+            <div class="flex items-center gap-2.5 transition-all duration-500 hover:scale-[1.02]">
+                <!-- Panel 1 -->
+                <div class="relative w-[140px] h-[198px] border-[4px] border-zinc-950 bg-black rounded shadow-xl overflow-hidden group">
+                    <div class="w-full h-full bg-cover bg-no-repeat brightness-90 group-hover:brightness-100 transition-all duration-500 select-none pointer-events-none" style="background-image: url('${selectedArt.src}'); background-size: 300% 100%; background-position: 0% 50%;"></div>
+                    <div class="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/5 to-white/10 pointer-events-none"></div>
+                </div>
+                <!-- Panel 2 -->
+                <div class="relative w-[140px] h-[198px] border-[4px] border-zinc-950 bg-black rounded shadow-xl overflow-hidden group">
+                    <div class="w-full h-full bg-cover bg-no-repeat brightness-90 group-hover:brightness-100 transition-all duration-500 select-none pointer-events-none" style="background-image: url('${selectedArt.src}'); background-size: 300% 100%; background-position: 50% 50%;"></div>
+                    <div class="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/5 to-white/10 pointer-events-none"></div>
+                </div>
+                <!-- Panel 3 -->
+                <div class="relative w-[140px] h-[198px] border-[4px] border-zinc-950 bg-black rounded shadow-xl overflow-hidden group">
+                    <div class="w-full h-full bg-cover bg-no-repeat brightness-90 group-hover:brightness-100 transition-all duration-500 select-none pointer-events-none" style="background-image: url('${selectedArt.src}'); background-size: 300% 100%; background-position: 100% 50%;"></div>
+                    <div class="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/5 to-white/10 pointer-events-none"></div>
+                </div>
+            </div>
+        `;
+    }
+
+    wrapper.innerHTML = html;
+
+    const priceTag = document.getElementById('preview-price-tag');
+    const descTag = document.getElementById('preview-desc-tag');
+    if (priceTag) priceTag.textContent = `LKR ${price.toLocaleString()}`;
+    if (descTag) descTag.textContent = desc;
+
+    const warningTag = document.getElementById('triptych-warning-tag');
+    if (warningTag) {
+        if (currentFormat === 'triptych') {
+            warningTag.classList.remove('opacity-0', 'pointer-events-none');
+            warningTag.classList.add('opacity-100');
+        } else {
+            warningTag.classList.remove('opacity-100');
+            warningTag.classList.add('opacity-0', 'pointer-events-none');
+        }
+    }
+}
+
+// Redirect Previewer Order to WhatsApp
+window.sendOrderMessage = function() {
+    const selectedArt = previewArtworks.find(art => art.id === currentArtId);
+    if (!selectedArt) return;
+
+    const formatName = currentFormat === 'single' ? 'Single A4 Poster' : '3-Panel Triptych Set';
+    const priceText = currentFormat === 'single' ? 'LKR 300' : 'LKR 1,000';
+
+    const message = `Hello Wall-E Prints! I am checking your online studio website. I want to place an order:
+- Product Artwork: ${selectedArt.name}
+- Layout Format: ${formatName} (${priceText})
+- Studio Backdrop: ${currentRoom === 'studio' ? 'Gaming Setup' : 'Living Room Setup'}
+
+Could you please confirm the payment and courier details? Thank you!`;
+
+    const encoded = encodeURIComponent(message);
+    window.open(`https://wa.me/94716354922?text=${encoded}`, '_blank');
+};
+
+// Carousel State Variables
+let carouselIndex = 0;
+let filteredArtworks = [];
+
+// Render Product Catalog Carousel
+window.renderCatalog = function(filter = 'all') {
+    const track = document.getElementById('carousel-track');
+    if (!track) return;
+
+    filteredArtworks = filter === 'all' ? artworks : artworks.filter(art => art.category === filter);
+    carouselIndex = 0;
+
+    if (filteredArtworks.length === 0) {
+        track.innerHTML = `<p class="text-xs text-gray-500">No showcase prints available in this category.</p>`;
+        const infoCard = document.getElementById('carousel-active-info');
+        if (infoCard) infoCard.style.opacity = '0';
+        return;
+    }
+
+    track.innerHTML = filteredArtworks.map((art, idx) => {
+        return `
+            <div onclick="selectCarouselSlide(${idx})" 
+                class="carousel-slide absolute w-[240px] sm:w-[340px] md:w-[440px] aspect-[4/3] rounded-3xl overflow-hidden border bg-zinc-950 shadow-2xl cursor-pointer"
+                style="transform: scale(0.7); opacity: 0; z-index: 10;">
+                <img src="${art.src}" alt="${art.name}" class="w-full h-full object-cover select-none pointer-events-none">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none"></div>
+            </div>
+        `;
+    }).join('');
+
+    updateCarousel();
+};
+
+// Select a specific slide on click (opens popup if active slide is clicked)
+window.selectCarouselSlide = function(idx) {
+    if (carouselIndex === idx) {
+        const art = filteredArtworks[idx];
+        if (art) window.openImagePopup(art.src, art.name);
+    } else {
+        carouselIndex = idx;
+        updateCarousel();
+    }
+};
+
+// Previous slide
+window.prevSlide = function() {
+    if (filteredArtworks.length === 0) return;
+    carouselIndex--;
+    if (carouselIndex < 0) carouselIndex = filteredArtworks.length - 1;
+    updateCarousel();
+};
+
+// Next slide
+window.nextSlide = function() {
+    if (filteredArtworks.length === 0) return;
+    carouselIndex++;
+    if (carouselIndex >= filteredArtworks.length) carouselIndex = 0;
+    updateCarousel();
+};
+
+// Update Carousel visual effects (scale down and opacity fade on left/right sides)
+function updateCarousel() {
+    const track = document.getElementById('carousel-track');
+    if (!track) return;
+
+    const slides = track.querySelectorAll('.carousel-slide');
+    if (slides.length === 0) return;
+
+    slides.forEach((slide, idx) => {
+        let diff = idx - carouselIndex;
+        const total = slides.length;
+
+        // Wrap diff dynamically for circular visual representation
+        if (diff < -total / 2) diff += total;
+        if (diff > total / 2) diff -= total;
+
+        const scale = 1 - Math.abs(diff) * 0.15;   // scale down left and right
+        const opacity = 1 - Math.abs(diff) * 0.6;  // fade out left and right
+        const zIndex = 30 - Math.abs(diff) * 10;
+        const translateX = diff * 50;              // translate percentage layout
+
+        if (Math.abs(diff) > 1.5) {
+            slide.style.opacity = '0';
+            slide.style.pointerEvents = 'none';
+        } else {
+            slide.style.transform = `translateX(${translateX}%) scale(${scale})`;
+            slide.style.opacity = opacity;
+            slide.style.zIndex = zIndex;
+            slide.style.pointerEvents = 'auto';
+        }
+
+        // Apply active/inactive border and glow styles
+        if (diff === 0) {
+            slide.className = "carousel-slide absolute w-[240px] sm:w-[340px] md:w-[440px] aspect-[4/3] rounded-3xl overflow-hidden border-2 border-red-500 shadow-red-glow cursor-pointer";
+        } else {
+            slide.className = "carousel-slide absolute w-[240px] sm:w-[340px] md:w-[440px] aspect-[4/3] rounded-3xl overflow-hidden border border-white/10 bg-zinc-950 shadow-2xl cursor-pointer";
+        }
+    });
+
+    updateActiveSlideInfo();
+}
+
+// Render active details below the carousel
+function updateActiveSlideInfo() {
+    const infoCard = document.getElementById('carousel-active-info');
+    if (!infoCard) return;
+
+    const activeArt = filteredArtworks[carouselIndex];
+    if (!activeArt) {
+        infoCard.style.opacity = '0';
+        infoCard.style.transform = 'translateY(10px)';
+        return;
+    }
+
+    infoCard.innerHTML = `
+        <div class="space-y-1">
+            <span class="px-2.5 py-0.5 rounded-full border border-red-500/20 bg-red-500/10 text-[9px] font-bold text-red-300 uppercase tracking-widest inline-block">
+                ${activeArt.category}
+            </span>
+            <h3 class="font-display font-extrabold uppercase text-white tracking-wide text-sm">${activeArt.name}</h3>
+            <p class="text-xs text-gray-500 leading-relaxed max-w-[500px] mx-auto">${activeArt.desc}</p>
+        </div>
+        
+        <div class="flex justify-between items-center pt-3 border-t border-gray-800/40 max-w-[450px] mx-auto">
+            <div class="text-left">
+                <span class="text-[9px] text-gray-500 uppercase block font-semibold">Standard Print</span>
+                <span class="font-tech font-bold text-white text-base">LKR ${activeArt.price.toLocaleString()}</span>
+            </div>
+            <button onclick="orderProduct('${activeArt.id}')" class="px-5 py-2.5 bg-red-600 hover:bg-red-500 hover:text-white rounded-xl text-xs font-bold text-white uppercase tracking-wider transition-all duration-300 flex items-center gap-1.5 shadow-red-glow">
+                <i class="fa-solid fa-cart-shopping"></i> Order Print
+            </button>
+        </div>
+    `;
+
+    infoCard.style.opacity = '1';
+    infoCard.style.transform = 'translateY(0)';
+}
+
+// Gallery Item click redirect
+window.orderProduct = function(artId) {
+    const art = artworks.find(a => a.id === artId);
+    if (!art) return;
+
+    const message = `Hello Wall-E Prints! I would like to order a poster print of your showcase artwork: "${art.name}" (LKR ${art.price.toLocaleString()}).
+Could you let me know the finishes available (matte/glossy/stickers) and details for ordering?`;
+
+    const encoded = encodeURIComponent(message);
+    window.open(`https://wa.me/94716354922?text=${encoded}`, '_blank');
+};
+
+// Checkbox Change Handler to Toggle Textarea
+window.onCheckboxChange = function() {
+    const customImgCheck = document.getElementById('form-custom-img-check');
+    const editRequiredCheck = document.getElementById('form-edit-required-check');
+    const commentContainer = document.getElementById('form-comment-container');
+
+    if (!customImgCheck || !editRequiredCheck || !commentContainer) return;
+
+    if (customImgCheck.checked || editRequiredCheck.checked) {
+        commentContainer.classList.remove('hidden');
+    } else {
+        commentContainer.classList.add('hidden');
+    }
+
+    window.calculateFormCost();
+};
+
+// Cost Calculator Logic
+window.calculateFormCost = function() {
+    const mediaSelect = document.getElementById('form-media-select');
+    const qtyInput = document.getElementById('form-qty-input');
+    const customImgCheck = document.getElementById('form-custom-img-check');
+    const editRequiredCheck = document.getElementById('form-edit-required-check');
+    const estimateTag = document.getElementById('form-estimate-tag');
+
+    if (!mediaSelect || !qtyInput || !customImgCheck || !editRequiredCheck || !estimateTag) return null;
+
+    const selectedMedia = mediaSelect.options[mediaSelect.selectedIndex];
+    const mediaPrice = parseInt(selectedMedia.getAttribute('data-price') || '0', 10);
+
+    const qty = Math.max(1, parseInt(qtyInput.value || '1', 10));
+
+    // Bespoke design surcharge (base LKR 150 design fee if editing checked)
+    let editSurcharge = 0;
+    if (editRequiredCheck.checked) {
+        editSurcharge = 150; // Starting surcharge (range is 150-500)
+    }
+
+    const totalPrice = (mediaPrice * qty) + editSurcharge;
+
+    if (editRequiredCheck.checked) {
+        estimateTag.textContent = `LKR ${totalPrice.toLocaleString()}* + 450`;
+    } else {
+        estimateTag.textContent = `LKR ${totalPrice.toLocaleString()} + 450`;
+    }
+
+    return {
+        mediaName: selectedMedia.text.split(' - ')[0],
+        mediaPrice,
+        qty,
+        isCustomImg: customImgCheck.checked,
+        isEditRequired: editRequiredCheck.checked,
+        editSurcharge,
+        totalPrice
+    };
+};
+
+// WhatsApp sender for Quote form
+window.sendFormOrder = function() {
+    const details = window.calculateFormCost();
+    if (!details) return;
+
+    const requirementInput = document.getElementById('form-requirement-text');
+    const requirementText = requirementInput ? requirementInput.value.trim() : '';
+
+    let customDetails = '';
+    if (details.isCustomImg) {
+        customDetails += `\n- Image Source: User Custom Photo`;
+    } else {
+        customDetails += `\n- Image Source: Gallery Design`;
+    }
+
+    if (details.isEditRequired) {
+        customDetails += `\n- Bespoke Editing: Required (+ LKR ${details.editSurcharge} base design fee)`;
+    }
+
+    if (requirementText) {
+        customDetails += `\n- Design Requirements: "${requirementText}"`;
+    }
+
+    const message = `Hello Wall-E Prints! I am sending an order request via the quote calculator:
+- Selection Finishes: ${details.mediaName}
+- Order Quantity: ${details.qty} print(s)${customDetails}
+- Total Estimated Cost: LKR ${details.totalPrice.toLocaleString()} + 450 (LKR 450 is charged for delivery)${details.isEditRequired ? ' (Bespoke design surcharge may vary based on complexity)' : ''}
+
+Please send instructions on where to send my image files. Thank you!`;
+
+    const encoded = encodeURIComponent(message);
+    window.open(`https://wa.me/94716354922?text=${encoded}`, '_blank');
+};
+
+// Navigation Scrollspy Highlight Setup
+const navLinks = document.querySelectorAll('nav div a[href^="#"]');
+const sections = Array.from(navLinks).map(link => document.querySelector(link.getAttribute('href')));
+
+function updateActiveScrollSpy() {
+    let activeIndex = 0;
+    const scrollPosition = window.scrollY + window.innerHeight / 3;
+
+    sections.forEach((section, index) => {
+        if (section && scrollPosition >= section.offsetTop) {
+            activeIndex = index;
+        }
+    });
+
+    navLinks.forEach((link, idx) => {
+        if (idx === activeIndex) {
+            link.className = "px-5 py-2 text-xs font-extrabold text-black bg-white rounded-full transition shadow-[0_0_15px_rgba(255,255,255,0.4)]";
+        } else {
+            link.className = "px-4 py-2 text-xs font-semibold text-gray-400 hover:text-white transition";
+        }
+    });
+}
+
+// Open Image Zoom Popup Modal
+window.openImagePopup = function(src, name) {
+    const modal = document.getElementById('image-popup-modal');
+    const img = document.getElementById('popup-modal-image');
+    const title = document.getElementById('popup-modal-title');
+
+    if (!modal || !img || !title) return;
+
+    img.src = src;
+    title.textContent = name;
+
+    modal.classList.remove('opacity-0', 'pointer-events-none');
+    modal.classList.add('opacity-100', 'pointer-events-auto');
+};
+
+// Close Image Zoom Popup Modal
+window.closeImagePopup = function() {
+    const modal = document.getElementById('image-popup-modal');
+    if (!modal) return;
+
+    modal.classList.remove('opacity-100', 'pointer-events-auto');
+    modal.classList.add('opacity-0', 'pointer-events-none');
+};
+
+// Initializers
+document.addEventListener('DOMContentLoaded', () => {
+    // 0. Setup Image Popup backdrop click close helper
+    const popupModal = document.getElementById('image-popup-modal');
+    if (popupModal) {
+        popupModal.addEventListener('click', (e) => {
+            if (e.target === popupModal) {
+                window.closeImagePopup();
+            }
+        });
+    }
+
+    // 1. Load Background Particles
+    initThreeBg();
+
+    // 2. Setup Virtual room selectors
+    window.setRoom('studio');
+    window.setPreviewFormat('single');
+    selectArt('port1');
+
+    // 3. Render Catalog
+    window.renderCatalog('all');
+
+    // 4. Initialize Calculator Value
+    window.calculateFormCost();
+
+    // 5. Scrollspy hook
+    window.addEventListener('scroll', updateActiveScrollSpy);
+    updateActiveScrollSpy();
+});
