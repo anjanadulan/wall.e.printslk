@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://anjanadulan.github.io/wall.e.printslk/sitemap.xml
+Sitemap: https://walleprintslk.vercel.app/sitemap.xml
